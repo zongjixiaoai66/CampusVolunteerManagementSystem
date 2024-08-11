@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FeihuodongDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.feizhiyuan_id as feizhiyuanId
+        ,a.feihuodong_name as feihuodongName
+        ,a.feihuodong_uuid_number as feihuodongUuidNumber
+        ,a.feihuodong_photo as feihuodongPhoto
+        ,a.feihuodong_address as feihuodongAddress
+        ,a.feihuodong_types as feihuodongTypes
+        ,a.feihuodong_kucun_number as feihuodongKucunNumber
+        ,a.feihuodong_tiaojian as feihuodongTiaojian
+        ,a.feihuodong_content as feihuodongContent
+        ,a.feihuodong_delete as feihuodongDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.FeihuodongView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,feizhiyuan.feizhiyuan_name as feizhiyuanName
+        ,feizhiyuan.feizhiyuan_phone as feizhiyuanPhone
+        ,feizhiyuan.feizhiyuan_id_number as feizhiyuanIdNumber
+        ,feizhiyuan.feizhiyuan_photo as feizhiyuanPhoto
+        ,feizhiyuan.feizhiyuan_email as feizhiyuanEmail
+
+        FROM feihuodong  a
+        left JOIN feizhiyuan feizhiyuan ON a.feizhiyuan_id = feizhiyuan.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.feizhiyuanId != null and params.feizhiyuanId != ''">
+                and (
+                    a.feizhiyuan_id = #{params.feizhiyuanId}
+                )
+            </if>
+            <if test=" params.feihuodongName != '' and params.feihuodongName != null and params.feihuodongName != 'null' ">
+                and a.feihuodong_name like CONCAT('%',#{params.feihuodongName},'%')
+            </if>
+            <if test=" params.feihuodongUuidNumber != '' and params.feihuodongUuidNumber != null and params.feihuodongUuidNumber != 'null' ">
+                and a.feihuodong_uuid_number like CONCAT('%',#{params.feihuodongUuidNumber},'%')
+            </if>
+            <if test=" params.feihuodongAddress != '' and params.feihuodongAddress != null and params.feihuodongAddress != 'null' ">
+                and a.feihuodong_address like CONCAT('%',#{params.feihuodongAddress},'%')
+            </if>
+            <if test="params.feihuodongTypes != null and params.feihuodongTypes != ''">
+                and a.feihuodong_types = #{params.feihuodongTypes}
+            </if>
+            <if test="params.feihuodongKucunNumberStart != null and params.feihuodongKucunNumberStart != ''">
+                <![CDATA[  and a.feihuodong_kucun_number >= #{params.feihuodongKucunNumberStart}   ]]>
+            </if>
+            <if test="params.feihuodongKucunNumberEnd != null and params.feihuodongKucunNumberEnd != ''">
+                <![CDATA[  and a.feihuodong_kucun_number <= #{params.feihuodongKucunNumberEnd}   ]]>
+            </if>
+             <if test="params.feihuodongKucunNumber != null and params.feihuodongKucunNumber != ''">
+                and a.feihuodong_kucun_number = #{params.feihuodongKucunNumber}
+             </if>
+            <if test=" params.feihuodongTiaojian != '' and params.feihuodongTiaojian != null and params.feihuodongTiaojian != 'null' ">
+                and a.feihuodong_tiaojian like CONCAT('%',#{params.feihuodongTiaojian},'%')
+            </if>
+            <if test=" params.feihuodongContent != '' and params.feihuodongContent != null and params.feihuodongContent != 'null' ">
+                and a.feihuodong_content like CONCAT('%',#{params.feihuodongContent},'%')
+            </if>
+            <if test="params.feihuodongDeleteStart != null and params.feihuodongDeleteStart != ''">
+                <![CDATA[  and a.feihuodong_delete >= #{params.feihuodongDeleteStart}   ]]>
+            </if>
+            <if test="params.feihuodongDeleteEnd != null and params.feihuodongDeleteEnd != ''">
+                <![CDATA[  and a.feihuodong_delete <= #{params.feihuodongDeleteEnd}   ]]>
+            </if>
+             <if test="params.feihuodongDelete != null and params.feihuodongDelete != ''">
+                and a.feihuodong_delete = #{params.feihuodongDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断非志愿者的id不为空 -->
+            <if test=" params.feizhiyuanIdNotNull != '' and params.feizhiyuanIdNotNull != null and params.feizhiyuanIdNotNull != 'null' ">
+                and a.feizhiyuan_id IS NOT NULL
+            </if>
+            <if test=" params.feizhiyuanName != '' and params.feizhiyuanName != null and params.feizhiyuanName != 'null' ">
+                and feizhiyuan.feizhiyuan_name like CONCAT('%',#{params.feizhiyuanName},'%')
+            </if>
+            <if test=" params.feizhiyuanPhone != '' and params.feizhiyuanPhone != null and params.feizhiyuanPhone != 'null' ">
+                and feizhiyuan.feizhiyuan_phone like CONCAT('%',#{params.feizhiyuanPhone},'%')
+            </if>
+            <if test=" params.feizhiyuanIdNumber != '' and params.feizhiyuanIdNumber != null and params.feizhiyuanIdNumber != 'null' ">
+                and feizhiyuan.feizhiyuan_id_number like CONCAT('%',#{params.feizhiyuanIdNumber},'%')
+            </if>
+            <if test=" params.feizhiyuanEmail != '' and params.feizhiyuanEmail != null and params.feizhiyuanEmail != 'null' ">
+                and feizhiyuan.feizhiyuan_email like CONCAT('%',#{params.feizhiyuanEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

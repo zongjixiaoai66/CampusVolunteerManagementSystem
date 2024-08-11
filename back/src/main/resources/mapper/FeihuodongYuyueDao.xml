@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FeihuodongYuyueDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.feihuodong_yuyue_uuid_number as feihuodongYuyueUuidNumber
+        ,a.feihuodong_id as feihuodongId
+        ,a.zhiyuanzhe_id as zhiyuanzheId
+        ,a.feihuodong_yuyue_text as feihuodongYuyueText
+        ,a.feihuodong_yuyue_yesno_types as feihuodongYuyueYesnoTypes
+        ,a.feihuodong_yuyue_yesno_text as feihuodongYuyueYesnoText
+        ,a.feihuodong_yuyue_shenhe_time as feihuodongYuyueShenheTime
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.FeihuodongYuyueView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,feihuodong.feizhiyuan_id as feihuodongFeizhiyuanId
+        ,feihuodong.feihuodong_name as feihuodongName
+        ,feihuodong.feihuodong_uuid_number as feihuodongUuidNumber
+        ,feihuodong.feihuodong_photo as feihuodongPhoto
+        ,feihuodong.feihuodong_address as feihuodongAddress
+        ,feihuodong.feihuodong_types as feihuodongTypes
+        ,feihuodong.feihuodong_kucun_number as feihuodongKucunNumber
+        ,feihuodong.feihuodong_tiaojian as feihuodongTiaojian
+        ,feihuodong.feihuodong_content as feihuodongContent
+        ,feihuodong.feihuodong_delete as feihuodongDelete
+        ,zhiyuanzhe.zhiyuanzhe_name as zhiyuanzheName
+        ,zhiyuanzhe.zhiyuanzhe_phone as zhiyuanzhePhone
+        ,zhiyuanzhe.zhiyuanzhe_id_number as zhiyuanzheIdNumber
+        ,zhiyuanzhe.zhiyuanzhe_photo as zhiyuanzhePhoto
+        ,zhiyuanzhe.zhiyuanzhe_email as zhiyuanzheEmail
+
+        FROM feihuodong_yuyue  a
+        left JOIN feihuodong feihuodong ON a.feihuodong_id = feihuodong.id
+        left JOIN zhiyuanzhe zhiyuanzhe ON a.zhiyuanzhe_id = zhiyuanzhe.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.feihuodongYuyueUuidNumber != '' and params.feihuodongYuyueUuidNumber != null and params.feihuodongYuyueUuidNumber != 'null' ">
+                and a.feihuodong_yuyue_uuid_number like CONCAT('%',#{params.feihuodongYuyueUuidNumber},'%')
+            </if>
+            <if test="params.feihuodongId != null and params.feihuodongId != ''">
+                and (
+                    a.feihuodong_id = #{params.feihuodongId}
+                )
+            </if>
+            <if test="params.zhiyuanzheId != null and params.zhiyuanzheId != ''">
+                and (
+                    a.zhiyuanzhe_id = #{params.zhiyuanzheId}
+                )
+            </if>
+            <if test=" params.feihuodongYuyueText != '' and params.feihuodongYuyueText != null and params.feihuodongYuyueText != 'null' ">
+                and a.feihuodong_yuyue_text like CONCAT('%',#{params.feihuodongYuyueText},'%')
+            </if>
+            <if test="params.feihuodongYuyueYesnoTypes != null and params.feihuodongYuyueYesnoTypes != ''">
+                and a.feihuodong_yuyue_yesno_types = #{params.feihuodongYuyueYesnoTypes}
+            </if>
+            <if test=" params.feihuodongYuyueYesnoText != '' and params.feihuodongYuyueYesnoText != null and params.feihuodongYuyueYesnoText != 'null' ">
+                and a.feihuodong_yuyue_yesno_text like CONCAT('%',#{params.feihuodongYuyueYesnoText},'%')
+            </if>
+            <if test=" params.feihuodongYuyueShenheTimeStart != '' and params.feihuodongYuyueShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.feihuodong_yuyue_shenhe_time) >= UNIX_TIMESTAMP(#{params.feihuodongYuyueShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.feihuodongYuyueShenheTimeEnd != '' and params.feihuodongYuyueShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.feihuodong_yuyue_shenhe_time) <= UNIX_TIMESTAMP(#{params.feihuodongYuyueShenheTimeEnd}) ]]>
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断活动的id不为空 -->
+            <if test=" params.feihuodongIdNotNull != '' and params.feihuodongIdNotNull != null and params.feihuodongIdNotNull != 'null' ">
+                and a.feihuodong_id IS NOT NULL
+            </if>
+            <if test="params.feizhiyuanId != null  and params.feizhiyuanId != ''">
+                and feihuodong.feizhiyuan_id = #{params.feizhiyuanId}
+            </if>
+            <if test=" params.feihuodongName != '' and params.feihuodongName != null and params.feihuodongName != 'null' ">
+                and feihuodong.feihuodong_name like CONCAT('%',#{params.feihuodongName},'%')
+            </if>
+            <if test=" params.feihuodongUuidNumber != '' and params.feihuodongUuidNumber != null and params.feihuodongUuidNumber != 'null' ">
+                and feihuodong.feihuodong_uuid_number like CONCAT('%',#{params.feihuodongUuidNumber},'%')
+            </if>
+            <if test=" params.feihuodongAddress != '' and params.feihuodongAddress != null and params.feihuodongAddress != 'null' ">
+                and feihuodong.feihuodong_address like CONCAT('%',#{params.feihuodongAddress},'%')
+            </if>
+            <if test="params.feihuodongTypes != null  and params.feihuodongTypes != ''">
+                and feihuodong.feihuodong_types = #{params.feihuodongTypes}
+            </if>
+
+            <if test="params.feihuodongKucunNumberStart != null  and params.feihuodongKucunNumberStart != '' ">
+                <![CDATA[  and feihuodong.feihuodong_kucun_number >= #{params.feihuodongKucunNumberStart}   ]]>
+            </if>
+            <if test="params.feihuodongKucunNumberEnd != null  and params.feihuodongKucunNumberEnd != '' ">
+                <![CDATA[  and feihuodong.feihuodong_kucun_number <= #{params.feihuodongKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.feihuodongKucunNumber != null  and params.feihuodongKucunNumber != '' ">
+                and feihuodong.feihuodong_kucun_number = #{params.feihuodongKucunNumber}
+            </if>
+            <if test=" params.feihuodongTiaojian != '' and params.feihuodongTiaojian != null and params.feihuodongTiaojian != 'null' ">
+                and feihuodong.feihuodong_tiaojian like CONCAT('%',#{params.feihuodongTiaojian},'%')
+            </if>
+            <if test=" params.feihuodongContent != '' and params.feihuodongContent != null and params.feihuodongContent != 'null' ">
+                and feihuodong.feihuodong_content like CONCAT('%',#{params.feihuodongContent},'%')
+            </if>
+            <if test="params.feihuodongDeleteStart != null  and params.feihuodongDeleteStart != '' ">
+                <![CDATA[  and feihuodong.feihuodong_delete >= #{params.feihuodongDeleteStart}   ]]>
+            </if>
+            <if test="params.feihuodongDeleteEnd != null  and params.feihuodongDeleteEnd != '' ">
+                <![CDATA[  and feihuodong.feihuodong_delete <= #{params.feihuodongDeleteEnd}   ]]>
+            </if>
+            <if test="params.feihuodongDelete != null  and params.feihuodongDelete != '' ">
+                and feihuodong.feihuodong_delete = #{params.feihuodongDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(feihuodong.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(feihuodong.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断志愿者的id不为空 -->
+            <if test=" params.zhiyuanzheIdNotNull != '' and params.zhiyuanzheIdNotNull != null and params.zhiyuanzheIdNotNull != 'null' ">
+                and a.zhiyuanzhe_id IS NOT NULL
+            </if>
+            <if test=" params.zhiyuanzheName != '' and params.zhiyuanzheName != null and params.zhiyuanzheName != 'null' ">
+                and zhiyuanzhe.zhiyuanzhe_name like CONCAT('%',#{params.zhiyuanzheName},'%')
+            </if>
+            <if test=" params.zhiyuanzhePhone != '' and params.zhiyuanzhePhone != null and params.zhiyuanzhePhone != 'null' ">
+                and zhiyuanzhe.zhiyuanzhe_phone like CONCAT('%',#{params.zhiyuanzhePhone},'%')
+            </if>
+            <if test=" params.zhiyuanzheIdNumber != '' and params.zhiyuanzheIdNumber != null and params.zhiyuanzheIdNumber != 'null' ">
+                and zhiyuanzhe.zhiyuanzhe_id_number like CONCAT('%',#{params.zhiyuanzheIdNumber},'%')
+            </if>
+            <if test=" params.zhiyuanzheEmail != '' and params.zhiyuanzheEmail != null and params.zhiyuanzheEmail != 'null' ">
+                and zhiyuanzhe.zhiyuanzhe_email like CONCAT('%',#{params.zhiyuanzheEmail},'%')
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
